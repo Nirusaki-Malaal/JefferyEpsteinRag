@@ -2,7 +2,7 @@ import os
 import uvicorn
 import asyncio
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -158,13 +158,37 @@ async def handle_query(req: QueryRequest):
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Pipeline error: {str(e)}")
+        error_msg = str(e)
+        if "PERMISSION_DENIED" in error_msg or "denied access" in error_msg:
+            raise HTTPException(
+                status_code=400,
+                detail="The configured Gemini API Key has been denied access by Google AI Studio (403 Permission Denied). Please open the Start Menu (bottom-left) and enter a valid Gemini API Key."
+            )
+        raise HTTPException(status_code=500, detail=f"Pipeline error: {error_msg}")
 
 DIST_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "dist"))
 ASSETS_PATH = os.path.join(DIST_PATH, "assets")
+WALLPAPERS_PATH = os.path.join(DIST_PATH, "wallpapers")
 
 if os.path.exists(ASSETS_PATH):
     bot.mount("/assets", StaticFiles(directory=ASSETS_PATH), name="assets")
+
+if os.path.exists(WALLPAPERS_PATH):
+    bot.mount("/wallpapers", StaticFiles(directory=WALLPAPERS_PATH), name="wallpapers")
+
+@bot.get("/favicon.svg")
+async def get_favicon():
+    fav = os.path.join(DIST_PATH, "favicon.svg")
+    if os.path.exists(fav):
+        return FileResponse(fav)
+    raise HTTPException(status_code=404, detail="favicon.svg not found")
+
+@bot.get("/icons.svg")
+async def get_icons():
+    ic = os.path.join(DIST_PATH, "icons.svg")
+    if os.path.exists(ic):
+        return FileResponse(ic)
+    raise HTTPException(status_code=404, detail="icons.svg not found")
 
 @bot.get("/", response_class=HTMLResponse)
 async def get_index():
