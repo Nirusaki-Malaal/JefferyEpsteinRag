@@ -8,41 +8,55 @@ BASE_DIR = os.path.abspath(os.path.join(current_dir, "..", "..", "ocr_text"))
 
 class OCR:
     async def soft_ocr(self,pdf_path,sem, dicc):
-        name = os.path.splitext(dicc["NAME"])[0]
+        if not pdf_path or not os.path.exists(pdf_path):
+            return None
+
+        name = os.path.splitext(dicc.get("NAME", "unknown"))[0]
         text_path = f"{BASE_DIR}/{name}.txt"
         if os.path.exists(text_path):
             return {**dicc, "TEXT_PATH" : text_path}
 
-        async with sem:
-            doc = pdfium.PdfDocument(pdf_path)
-            full_text = []
-            has_digital_text = False
-
-            for page in doc:
-                text_page = page.get_textpage()
-                text = text_page.get_text_bounded()
-                if text.strip():
-                    has_digital_text = True
-                    full_text.append(text)
-
-            if has_digital_text:
-                full_text = '\n'.join(full_text)
-            else:
-                pages = convert_from_path(pdf_path)
+        try:
+            async with sem:
+                doc = pdfium.PdfDocument(pdf_path)
                 full_text = []
-                for page in pages:
-                    text = pytesseract.image_to_string(page)
-                    full_text.append(text)
+                has_digital_text = False
 
-                full_text = '\n'.join(full_text)
-            with open(text_path, "w") as f_d:
-                f_d.write(full_text)    
-            return {**dicc, "TEXT_PATH" : text_path}
+                for page in doc:
+                    text_page = page.get_textpage()
+                    text = text_page.get_text_bounded()
+                    if text.strip():
+                        has_digital_text = True
+                        full_text.append(text)
+
+                if has_digital_text:
+                    full_text = '\n'.join(full_text)
+                else:
+                    pages = convert_from_path(pdf_path)
+                    full_text = []
+                    for page in pages:
+                        text = pytesseract.image_to_string(page)
+                        full_text.append(text)
+
+                    full_text = '\n'.join(full_text)
+                with open(text_path, "w") as f_d:
+                    f_d.write(full_text)    
+                return {**dicc, "TEXT_PATH" : text_path}
+        except Exception as e:
+            print(f"[OCR ERROR] Failed to process or load PDF document '{pdf_path}': {e}")
+            try:
+                if os.path.exists(pdf_path):
+                    os.remove(pdf_path)
+                    print(f"[OCR CLEANUP] Removed corrupted/invalid PDF file: '{pdf_path}'")
+            except Exception as cleanup_err:
+                print(f"[OCR CLEANUP ERROR] Failed to remove '{pdf_path}': {cleanup_err}")
+            return None
     
     async def extract(self,lst):
         sem = asyncio.Semaphore(3)
-        tasks = [self.soft_ocr(diccs.get("PATH", ""),sem, diccs) for diccs in lst]
-        return await asyncio.gather(*tasks)
+        tasks = [self.soft_ocr(diccs.get("PATH", ""),sem, diccs) for diccs in lst if diccs and diccs.get("PATH")]
+        results = await asyncio.gather(*tasks)
+        return [r for r in results if r is not None]
     
 if __name__ == "__main__":
     from app.plugins.fetch import API, BASE_URL
