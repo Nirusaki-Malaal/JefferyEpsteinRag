@@ -336,7 +336,7 @@ class LLM:
 
         cleaned = self._strip_json_wrapper(answer_text)
         try:
-            payload = json.loads(cleaned)
+            payload = json.loads(cleaned, strict=False)
         except Exception:
             normalized = answer_text
             for placeholder, url in citation_map.items():
@@ -345,6 +345,17 @@ class LLM:
 
         if not isinstance(payload, dict):
             return answer_text
+
+        def deep_clean(val):
+            if isinstance(val, str):
+                return val.strip()
+            elif isinstance(val, list):
+                return [deep_clean(item) for item in val]
+            elif isinstance(val, dict):
+                return {k.strip(): deep_clean(v) for k, v in val.items()}
+            return val
+
+        payload = deep_clean(payload)
 
         points = self._listify(payload.get("points"))
         payload["points"] = points
