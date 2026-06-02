@@ -1,3 +1,44 @@
+# Custom RAG App Exclusions
 downloads/*
 ocr_text/*
 .env
+__pycache__/
+*.pyc
+
+# Virtual Environments
+venv/
+.venv/
+**/venv/
+**/.venv/
+
+# Node & Frontend Exclusions
+node_modules/
+**/node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+
+# Exclude massive Windows 7 wallpaper archive (350MB bloat)
+# Selected wallpapers used by the app are located in public/wallpapers/
+frontend/win7wallpapers/
+win7wallpapers/
+**/win7wallpapers/
+
+# Logs & Debug files
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

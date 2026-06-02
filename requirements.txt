@@ -1,4 +1,13 @@
 fastapi
+uvicorn
+python-dotenv
+httpx
+requests
+numpy
+fastembed
 pypdfium2
 pdf2image
 pytesseract
+groq
+google-genai
+duckduckgo_search
