@@ -1,5 +1,5 @@
 import os, httpx, asyncio
-
+from .ocr import BASE_DIR
 current_dir = os.path.dirname(os.path.abspath(__file__))
 BASE_URL = os.path.abspath(os.path.join(current_dir, "..", "..", "downloads"))
 COOKIES = {"ak_bmsc":"bypass", "justiceGovAgeVerified": "true"}
@@ -24,20 +24,38 @@ class API():
            return []
         
     async def fetch(self,query,num=10) -> list:
-        end = -(-num // 10)
         sem = asyncio.Semaphore(5)
         link_list = []
+        page_index = 0
+        
         async with httpx.AsyncClient(timeout=60.0) as client:
-            tasks = [self.fetch_page(client, sem, query, i) for i in range(1, end + 1)]
-            pages = await asyncio.gather(*tasks)
-        for hits in pages:
-            for j in hits:
-                if len(link_list) == num:
-                    return link_list
-                url = j.get("_source", {}).get("ORIGIN_FILE_URI", "")
-                file_name = j.get("_source", {}).get("ORIGIN_FILE_NAME", "")
-                peek = '\n'.join(j.get("highlight", {}).get("content", []))
-                link_list.append({"URL": url, "NAME": file_name, "PEEK": peek})
+            while len(link_list) < num:
+                tasks = [self.fetch_page(client, sem, query, i) for i in range(page_index, page_index + 3)]
+                pages = await asyncio.gather(*tasks)
+                page_index += 3
+                
+                found_any = False
+                for hits in pages:
+                    if not hits:
+                        continue
+                    found_any = True
+                    for j in hits:
+                        if len(link_list) >= num:
+                            break
+                        url = j.get("_source", {}).get("ORIGIN_FILE_URI", "")
+                        if not url.lower().endswith(".pdf"):
+                            continue
+                            
+                        file_name = j.get("_source", {}).get("ORIGIN_FILE_NAME", "")
+                        peek = '\n'.join(j.get("highlight", {}).get("content", []))
+                        link_list.append({"URL": url, "NAME": file_name, "PEEK": peek})
+                        
+                    if len(link_list) >= num:
+                        break
+                        
+                if not found_any:
+                    break
+                    
         return link_list
 
     async def download_link(self,client,sem, link) -> str:
@@ -80,8 +98,12 @@ class API():
     
     async def refresh(self) -> None:
         import shutil
-        shutil.rmtree(BASE_URL)
+        if os.path.exists(BASE_URL):
+            shutil.rmtree(BASE_URL, ignore_errors=True)
+        if os.path.exists(BASE_DIR):
+            shutil.rmtree(BASE_DIR, ignore_errors=True)
         os.makedirs(BASE_URL, exist_ok=True)
+        os.makedirs(BASE_DIR, exist_ok=True)
 
 
 

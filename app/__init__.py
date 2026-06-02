@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
-import os , logging 
-from logging.handlers import RotatingFileHandler
+import os
 from fastapi import FastAPI
 
 if (os.path.exists('.env')):
@@ -8,31 +7,11 @@ if (os.path.exists('.env')):
 
 
 class Config:
-    PORT = int(os.environ.get("PORT")) or 3000
-    LOG_FILE_NAME = str(os.environ.get("LOG_FILE_NAME")) or "logs.txt"
-    API_KEY = os.environ.get("API_KEY")
-
-## CREATING A LOGGER
-
-# file_descriptor = open(Config.LOG_FILE_NAME, "w+")
-# file_descriptor.close()
-# del file_descriptor
-
-
-# logging.basicConfig(
-#     level=logging.INFO,
-#     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-#     datefmt="%d-%b-%y %H:%M:%S",
-#     handlers=[
-#         RotatingFileHandler(
-#             Config.LOG_FILE_NAME,
-#             maxBytes=2097152000,
-#             backupCount=10
-#         ),
-#         logging.StreamHandler()
-#     ]
-# )
-
-# LOGS = logging.getLogger(__name__)
+    PORT = int(os.environ.get("PORT", "3000"))
+    LOG_FILE_NAME = os.environ.get("LOG_FILE_NAME") or "logs.txt"
+    API_KEY = os.environ.get("API_KEY") or os.environ.get("GEMINI_API_KEY")
+    MODEL_PROVIDER = os.environ.get("MODEL_PROVIDER", "gemini").strip().lower()
+    GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "").strip()
+    GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b").strip()
 
 bot = FastAPI()
