@@ -10,4 +10,4 @@ pdf2image
 pytesseract
 groq
 google-genai
-duckduckgo_search
+ddgs
