@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeffrey Epstein Federal Court Documents RAG Bot</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-primary: #070913;
+            --bg-secondary: #0c0f24;
+            --glass-bg: rgba(15, 20, 42, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-highlight: rgba(255, 255, 255, 0.03);
+            
+            --accent-primary: #6366f1; /* Indigo */
+            --accent-secondary: #06b6d4; /* Cyan */
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            
+            --font-display: 'Outfit', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.06) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* Ambient Glow Backgrounds */
+        .ambient-glow-1 {
+            position: absolute;
+            top: 25%;
+            left: 20%;
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+            filter: blur(40px);
+        }
+
+        .ambient-glow-2 {
+            position: absolute;
+            bottom: 15%;
+            right: 15%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+            filter: blur(50px);
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Layout Container */
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            min-height: 100vh;
+        }
+
+        /* Header Navigation */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            margin-top: 8px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 8px rgba(99, 102, 241, 0.4));
+        }
+
+        .logo-title {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, #ffffff, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-configured {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+        .status-configured .status-dot {
+            background-color: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        .status-missing {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+        .status-missing .status-dot {
+            background-color: var(--error);
+            box-shadow: 0 0 8px var(--error);
+        }
+
+        .status-fallback {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+        .status-fallback .status-dot {
+            background-color: var(--warning);
+            box-shadow: 0 0 8px var(--warning);
+        }
+
+        /* Action Buttons */
+        .btn-settings {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .btn-settings:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        /* Search Hero Section */
+        .search-hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 40px 20px;
+            gap: 16px;
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        /* Sleek Search Bar */
+        .search-container {
+            width: 100%;
+            max-width: 800px;
+            position: relative;
+            margin-top: 12px;
+        }
+
+        .search-input-wrapper {
+            display: flex;
+            align-items: center;
+            position: relative;
+            border-radius: 14px;
+            padding: 4px;
+            background: rgba(10, 12, 28, 0.6);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .search-input-wrapper:focus-within {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25), 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-icon {
+            padding: 0 16px;
+            color: var(--text-dim);
+            font-size: 1.2rem;
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-size: 1.05rem;
+            padding: 14px 0;
+            width: 100%;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-dim);
+        }
+
+        .btn-search {
+            background: linear-gradient(135deg, var(--accent-primary), #4f46e5);
+            color: white;
+            border: none;
+            outline: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 4px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-search:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* Dynamic Pipeline Live Tracker */
+        .pipeline-tracker {
+            width: 100%;
+            max-width: 800px;
+            padding: 24px;
+            margin-top: 16px;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .pipeline-title {
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pipeline-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .step-item.active {
+            background: rgba(99, 102, 241, 0.04);
+            border-color: rgba(99, 102, 241, 0.15);
+            box-shadow: inset 2px 0 0 var(--accent-primary);
+        }
+
+        .step-item.completed {
+            background: rgba(16, 185, 129, 0.03);
+            border-color: rgba(16, 185, 129, 0.1);
+        }
+
+        .step-icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-dim);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .step-item.active .step-icon {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--accent-primary);
+            border-color: var(--accent-primary);
+            animation: pulse-border 1.5s infinite;
+        }
+
+        .step-item.completed .step-icon {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .step-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            flex: 1;
+        }
+
+        .step-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .step-item.active .step-name {
+            color: var(--text-main);
+        }
+
+        .step-item.completed .step-name {
+            color: var(--text-muted);
+        }
+
+        .step-status {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .step-item.active .step-status {
+            color: var(--accent-secondary);
+        }
+
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+
+        /* Results Panel Layout */
+        .results-panel {
+            display: none; /* Hidden by default */
+            grid-template-columns: 1.5fr 1fr;
+            gap: 24px;
+            margin-top: 12px;
+        }
+
+        @media (max-width: 1024px) {
+            .results-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Answer Workspace Card */
+        .answer-workspace {
+            display: flex;
+            flex-direction: column;
+            padding: 28px;
+            gap: 20px;
+        }
+
+        .answer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 16px;
+        }
+
+        .answer-title {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-main);
+        }
+
+        .answer-title i {
+            color: var(--accent-primary);
+        }
+
+        .reformulated-queries {
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.82rem;
+        }
+
+        .query-badge {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .query-badge-label {
+            font-weight: 700;
+            color: var(--accent-secondary);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            min-width: 100px;
+            letter-spacing: 0.5px;
+        }
+
+        .query-badge-val {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .answer-content {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #cbd5e1;
+            white-space: pre-wrap; /* Preserve formatting */
+        }
+
+        .answer-content p {
+            margin-bottom: 12px;
+        }
+
+        .answer-content strong {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        /* Sources Card */
+        .sources-workspace {
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            gap: 16px;
+            max-height: 800px;
+        }
+
+        .sources-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sources-title {
+            font-family: var(--font-display);
+            font-size: 1.15rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sources-title i {
+            color: var(--accent-secondary);
+        }
+
+        .sources-count {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sources-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .sources-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sources-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sources-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+        }
+
+        .sources-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .source-card {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .source-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .source-name {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .source-name i {
+            color: var(--accent-primary);
+        }
+
+        .source-score {
+            font-size: 0.78rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 9999px;
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent-secondary);
+            border: 1px solid rgba(6, 182, 212, 0.15);
+        }
+
+        .source-text {
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.25);
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            font-family: monospace;
+            max-height: 120px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        /* Settings Drawer overlay */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .drawer-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Settings Slide-out Drawer */
+        .settings-drawer {
+            position: fixed;
+            top: 0;
+            right: -420px;
+            width: 420px;
+            height: 100vh;
+            background: #090c1f;
+            border-left: 1px solid var(--glass-border);
+            z-index: 1001;
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            padding: 32px 24px;
+            gap: 24px;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media (max-width: 480px) {
+            .settings-drawer {
+                width: 100vw;
+                right: -100vw;
+            }
+        }
+
+        .settings-drawer.open {
+            right: 0;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 16px;
+        }
+
+        .drawer-title {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-close-drawer {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .btn-close-drawer:hover {
+            color: var(--text-main);
+        }
+
+        .settings-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .input-text {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-main);
+            padding: 12px 14px;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            outline: none;
+            width: 100%;
+        }
+
+        .input-text:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+        }
+
+        .form-hint {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            line-height: 1.4;
+        }
+
+        /* Range Sliders */
+        .range-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .input-range {
+            flex: 1;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            outline: none;
+            cursor: pointer;
+            accent-color: var(--accent-primary);
+        }
+
+        .range-val {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-secondary);
+            min-width: 32px;
+            text-align: right;
+        }
+
+        .btn-save-settings {
+            background: linear-gradient(135deg, var(--accent-primary), #4f46e5);
+            color: white;
+            border: none;
+            outline: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+            margin-top: 12px;
+        }
+
+        .btn-save-settings:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+        }
+
+        /* General notifications / alerts */
+        .toast-notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 14px 20px;
+            border-radius: 10px;
+            z-index: 10000;
+            background: rgba(12, 15, 36, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffffff;
+            font-size: 0.88rem;
+            font-weight: 600;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toast-notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast-success { border-left: 4px solid var(--success); }
+        .toast-success i { color: var(--success); }
+        .toast-error { border-left: 4px solid var(--error); }
+        .toast-error i { color: var(--error); }
+        .toast-warning { border-left: 4px solid var(--warning); }
+        .toast-warning i { color: var(--warning); }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="glass-panel">
+            <div class="logo-section">
+                <i class="fa-solid fa-scale-balanced logo-icon"></i>
+                <div class="logo-title">EPSTEIN RAG</div>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div id="apiStatusBadge" class="status-badge status-missing">
+                    <span class="status-dot"></span>
+                    <span id="apiStatusText">API KEY MISSING</span>
+                </div>
+                
+                <button id="openSettingsBtn" class="btn-settings">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Configure</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Search / Landing Section -->
+        <div class="search-hero">
+            <h1 class="hero-title">Sleek AI Legal Document RAG</h1>
+            <p class="hero-subtitle">Ask questions about Jeffrey Epstein court logs, flight manifests, FBI records, witness statements, and federal documents. The bot downloads and ORCs files from justice.gov in real-time.</p>
+            
+            <div class="search-container">
+                <form id="searchForm" onsubmit="event.preventDefault(); triggerSearch();">
+                    <div class="search-input-wrapper">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input id="searchInput" type="text" class="search-input" placeholder="e.g. connections between Narendra Modi and Jeffrey Epstein" required>
+                        <button type="submit" class="btn-search">
+                            <span>Execute</span>
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Pipeline Tracker (Live Stepper) -->
+        <div id="pipelineTracker" class="pipeline-tracker glass-panel">
+            <div class="pipeline-title">
+                <i class="fa-solid fa-arrows-spin fa-spin"></i>
+                <span>Execution Pipeline Progress</span>
+            </div>
+            
+            <div class="pipeline-steps">
+                <div id="step-reformulate" class="step-item">
+                    <div class="step-icon"><i class="fa-solid fa-brain"></i></div>
+                    <div class="step-info">
+                        <span class="step-name">Optimizing Query</span>
+                        <span class="step-status">Rephrasing to structural search keys...</span>
+                    </div>
+                </div>
+                
+                <div id="step-fetch" class="step-item">
+                    <div class="step-icon"><i class="fa-solid fa-globe"></i></div>
+                    <div class="step-info">
+                        <span class="step-name">Searching Federal Archives</span>
+                        <span class="step-status">Calling justice.gov/multimedia-search...</span>
+                    </div>
+                </div>
+                
+                <div id="step-download" class="step-item">
+                    <div class="step-icon"><i class="fa-solid fa-cloud-arrow-down"></i></div>
+                    <div class="step-info">
+                        <span class="step-name">Downloading Documents</span>
+                        <span class="step-status">Fetching and caching original PDFs...</span>
+                    </div>
+                </div>
+                
+                <div id="step-ocr" class="step-item">
+                    <div class="step-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                    <div class="step-info">
+                        <span class="step-name">Extracting Text & OCR</span>
+                        <span class="step-status">Opening PDFs and parsing scanned images...</span>
+                    </div>
+                </div>
+                
+                <div id="step-embed" class="step-item">
+                    <div class="step-icon"><i class="fa-solid fa-microchip"></i></div>
+                    <div class="step-info">
+                        <span class="step-name">Embedding & Semantic Analysis</span>
+                        <span class="step-status">Running fastembed/bge-small vectors...</span>
+                    </div>
+                </div>
+                
+                <div id="step-answer" class="step-item">
+                    <div class="step-icon"><i class="fa-solid fa-pen-nib"></i></div>
+                    <div class="step-info">
+                        <span class="step-name">Synthesizing Answer</span>
+                        <span class="step-status">Generating deep context responses...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Workspace Grid -->
+        <div id="resultsPanel" class="results-panel">
+            <!-- Left Side: Answer Workspace -->
+            <div class="answer-workspace glass-panel">
+                <div class="answer-header">
+                    <div class="answer-title">
+                        <i class="fa-solid fa-robot"></i>
+                        <span>AI Document Synthesis</span>
+                    </div>
+                </div>
+                
+                <!-- Reformulated Queries metadata -->
+                <div class="reformulated-queries">
+                    <div class="query-badge">
+                        <span class="query-badge-label">Search Keyword</span>
+                        <span id="reformulatedSearch" class="query-badge-val">...</span>
+                    </div>
+                    <div class="query-badge">
+                        <span class="query-badge-label">Semantic Expansion</span>
+                        <span id="reformulatedSemantic" class="query-badge-val">...</span>
+                    </div>
+                </div>
+                
+                <!-- Text Container -->
+                <div id="answerText" class="answer-content">
+                    Loading AI generated synthesis...
+                </div>
+            </div>
+
+            <!-- Right Side: Chunks / Sources -->
+            <div class="sources-workspace glass-panel">
+                <div class="sources-header">
+                    <div class="sources-title">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <span>Cited Document Chunks</span>
+                    </div>
+                    <div id="sourcesCount" class="sources-count">0 Chunks</div>
+                </div>
+                
+                <!-- Chunks List -->
+                <div id="sourcesList" class="sources-list">
+                    <!-- Source Cards will be injected dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drawer Overlay -->
+    <div id="drawerOverlay" class="drawer-overlay"></div>
+
+    <!-- Right Side Settings Drawer -->
+    <div id="settingsDrawer" class="settings-drawer">
+        <div class="drawer-header">
+            <div class="drawer-title">
+                <i class="fa-solid fa-sliders" style="color: var(--accent-primary);"></i>
+                <span>RAG BOT CONFIG</span>
+            </div>
+            <button id="closeSettingsBtn" class="btn-close-drawer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        
+        <div class="settings-form">
+            <div class="form-group">
+                <label class="form-label">Model Provider</label>
+                <select id="providerSelect" class="input-text" style="cursor: pointer; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border);">
+                    <option value="gemini">Google Gemini</option>
+                    <option value="groq">Groq Cloud</option>
+                    <option value="ollama">Local Ollama</option>
+                </select>
+            </div>
+
+            <div id="geminiConfigGroup" class="form-group">
+                <label class="form-label">Gemini API Key</label>
+                <input id="apiKeyInput" type="password" class="input-text" placeholder="Enter Gemini API Key (AQ.Ab... or AIza...)">
+                <span id="apiKeyStatusLabel" class="form-hint" style="color: var(--text-dim);">No key active. Enter key to make calls.</span>
+            </div>
+
+            <div id="groqConfigGroup" class="form-group" style="display: none;">
+                <label class="form-label" style="margin-bottom: 4px;">Groq API Key</label>
+                <input id="groqApiKeyInput" type="password" class="input-text" placeholder="Enter Groq API Key (gsk_...)">
+                <span id="groqApiKeyStatusLabel" class="form-hint" style="color: var(--text-dim); display: block; margin-bottom: 8px;">No Groq key active.</span>
+                
+                <label class="form-label" style="margin-top: 8px;">Groq Model Name</label>
+                <input id="groqModelInput" type="text" class="input-text" placeholder="openai/gpt-oss-120b" value="openai/gpt-oss-120b">
+            </div>
+
+            <div id="ollamaConfigGroup" class="form-group" style="display: none; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                <span class="form-hint" style="color: var(--accent-secondary); font-weight: 700; display: block; margin-bottom: 4px;">⚡ Local Ollama Active</span>
+                <span class="form-hint" style="font-size: 0.72rem; display: block; line-height: 1.4;">Using local model <strong>gemma4:e4b</strong> hosted on your local system. No external API keys are required.</span>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Search Depth (Files)</label>
+                <div class="range-wrapper">
+                    <input id="numFilesInput" type="range" class="input-range" min="3" max="30" value="10">
+                    <span id="numFilesVal" class="range-val">10</span>
+                </div>
+                <span class="form-hint">Maximum number of PDF documents fetched from justice.gov search hits to scan.</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Chunk Size (Chars)</label>
+                <div class="range-wrapper">
+                    <input id="chunkSizeInput" type="range" class="input-range" min="500" max="10000" step="500" value="4000">
+                    <span id="chunkSizeVal" class="range-val">4000</span>
+                </div>
+                <span class="form-hint">Character size to chunk the legal text. Larger chunks provide more context.</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Overlap (Chars)</label>
+                <div class="range-wrapper">
+                    <input id="overlapInput" type="range" class="input-range" min="100" max="2000" step="100" value="1000">
+                    <span id="overlapVal" class="range-val">1000</span>
+                </div>
+                <span class="form-hint">Characters overlapping between contiguous chunks to prevent context cutting.</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">📄 Document Chunks (LLM Context)</label>
+                <div class="range-wrapper">
+                    <input id="docChunksInput" type="range" class="input-range" min="1" max="30" step="1" value="15">
+                    <span id="docChunksVal" class="range-val">15</span>
+                </div>
+                <span class="form-hint">Number of top PDF chunks passed to the LLM for answer synthesis. Higher = more document evidence.</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">🌐 Web Chunks (LLM Context)</label>
+                <div class="range-wrapper">
+                    <input id="webChunksInput" type="range" class="input-range" min="0" max="10" step="1" value="3">
+                    <span id="webChunksVal" class="range-val">3</span>
+                </div>
+                <span class="form-hint">Number of internet search chunks passed to the LLM. Set to 0 to disable web search context.</span>
+            </div>
+
+            <button id="saveSettingsBtn" class="btn-save-settings">
+                <span>Save Configuration</span>
+                <i class="fa-solid fa-floppy-disk"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastNotification" class="toast-notification toast-success">
+        <i id="toastIcon" class="fa-solid fa-circle-check"></i>
+        <span id="toastMsg">Success message here!</span>
+    </div>
+
+    <!-- Frontend Core Scripts -->
+    <script>
+        // Drawer toggle selectors
+        const openSettingsBtn = document.getElementById('openSettingsBtn');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        const settingsDrawer = document.getElementById('settingsDrawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        
+        // Form & Slider selectors
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const numFilesInput = document.getElementById('numFilesInput');
+        const numFilesVal = document.getElementById('numFilesVal');
+        const chunkSizeInput = document.getElementById('chunkSizeInput');
+        const chunkSizeVal = document.getElementById('chunkSizeVal');
+        const overlapInput = document.getElementById('overlapInput');
+        const overlapVal = document.getElementById('overlapVal');
+        const docChunksInput = document.getElementById('docChunksInput');
+        const docChunksVal = document.getElementById('docChunksVal');
+        const webChunksInput = document.getElementById('webChunksInput');
+        const webChunksVal = document.getElementById('webChunksVal');
+        
+        // Status indicator selectors
+        const apiStatusBadge = document.getElementById('apiStatusBadge');
+        const apiStatusText = document.getElementById('apiStatusText');
+        const apiKeyStatusLabel = document.getElementById('apiKeyStatusLabel');
+
+        // Dynamic slider value syncing
+        numFilesInput.addEventListener('input', () => { numFilesVal.textContent = numFilesInput.value; });
+        chunkSizeInput.addEventListener('input', () => { chunkSizeVal.textContent = chunkSizeInput.value; });
+        overlapInput.addEventListener('input', () => { overlapVal.textContent = overlapInput.value; });
+        docChunksInput.addEventListener('input', () => { docChunksVal.textContent = docChunksInput.value; });
+        webChunksInput.addEventListener('input', () => { webChunksVal.textContent = webChunksInput.value; });
+
+        // Drawer trigger events
+        openSettingsBtn.addEventListener('click', () => {
+            settingsDrawer.classList.add('open');
+            drawerOverlay.classList.add('open');
+        });
+
+        const closeDrawer = () => {
+            settingsDrawer.classList.remove('open');
+            drawerOverlay.classList.remove('open');
+        };
+
+        closeSettingsBtn.addEventListener('click', closeDrawer);
+        drawerOverlay.addEventListener('click', closeDrawer);
+
+        // Toast notifications logic
+        const showToast = (message, type = 'success') => {
+            const toast = document.getElementById('toastNotification');
+            const icon = document.getElementById('toastIcon');
+            const msg = document.getElementById('toastMsg');
+            
+            toast.className = `toast-notification toast-${type}`;
+            
+            if (type === 'success') {
+                icon.className = 'fa-solid fa-circle-check';
+            } else if (type === 'error') {
+                icon.className = 'fa-solid fa-circle-exclamation';
+            } else {
+                icon.className = 'fa-solid fa-triangle-exclamation';
+            }
+            
+            msg.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        };
+
+        // Settings Drawer Element Bindings
+        const providerSelect = document.getElementById('providerSelect');
+        const geminiConfigGroup = document.getElementById('geminiConfigGroup');
+        const groqConfigGroup = document.getElementById('groqConfigGroup');
+        const ollamaConfigGroup = document.getElementById('ollamaConfigGroup');
+        
+        const groqApiKeyInput = document.getElementById('groqApiKeyInput');
+        const groqModelInput = document.getElementById('groqModelInput');
+        const groqApiKeyStatusLabel = document.getElementById('groqApiKeyStatusLabel');
+
+        providerSelect.addEventListener('change', () => {
+            const val = providerSelect.value;
+            geminiConfigGroup.style.display = val === 'gemini' ? 'block' : 'none';
+            groqConfigGroup.style.display = val === 'groq' ? 'block' : 'none';
+            ollamaConfigGroup.style.display = val === 'ollama' ? 'block' : 'none';
+        });
+
+        // Fetch settings from server
+        const loadSettings = async () => {
+            try {
+                const res = await fetch('/api/settings');
+                const data = await res.json();
+                
+                // Set current provider selection
+                const provider = data.provider || 'gemini';
+                providerSelect.value = provider;
+                
+                // Toggle display blocks
+                geminiConfigGroup.style.display = provider === 'gemini' ? 'block' : 'none';
+                groqConfigGroup.style.display = provider === 'groq' ? 'block' : 'none';
+                ollamaConfigGroup.style.display = provider === 'ollama' ? 'block' : 'none';
+                
+                // Gemini key bindings
+                if (data.raw_api_key_configured) {
+                    apiKeyStatusLabel.textContent = `Active Key: ${data.api_key}`;
+                    apiKeyInput.placeholder = '••••••••••••••••••••••••';
+                } else {
+                    apiKeyStatusLabel.textContent = 'No Gemini key active. Enter key to make calls.';
+                    apiKeyInput.placeholder = 'Enter Gemini API Key';
+                }
+                
+                // Groq key bindings
+                if (data.raw_groq_key_configured) {
+                    groqApiKeyStatusLabel.textContent = `Active Key: ${data.groq_api_key}`;
+                    groqApiKeyInput.placeholder = '••••••••••••••••••••••••';
+                } else {
+                    groqApiKeyStatusLabel.textContent = 'No Groq key active. Enter key to make calls.';
+                    groqApiKeyInput.placeholder = 'Enter Groq API Key';
+                }
+                groqModelInput.value = data.groq_model || 'openai/gpt-oss-120b';
+                
+                // Main status badge formatting
+                if (provider === 'gemini') {
+                    if (data.raw_api_key_configured) {
+                        apiStatusBadge.className = 'status-badge status-configured';
+                        apiStatusText.textContent = 'GEMINI ACTIVE';
+                    } else {
+                        apiStatusBadge.className = 'status-badge status-fallback';
+                        apiStatusText.textContent = 'OLLAMA FALLBACK';
+                    }
+                } else if (provider === 'groq') {
+                    if (data.raw_groq_key_configured) {
+                        apiStatusBadge.className = 'status-badge status-configured';
+                        apiStatusText.textContent = 'GROQ ACTIVE';
+                    } else {
+                        apiStatusBadge.className = 'status-badge status-fallback';
+                        apiStatusText.textContent = 'OLLAMA FALLBACK';
+                    }
+                } else {
+                    apiStatusBadge.className = 'status-badge status-configured';
+                    apiStatusText.textContent = 'OLLAMA ACTIVE';
+                }
+            } catch (err) {
+                console.error("Could not fetch settings:", err);
+            }
+        };
+
+        // Save settings to server
+        saveSettingsBtn.addEventListener('click', async () => {
+            const api_key = apiKeyInput.value.trim();
+            const groq_api_key = groqApiKeyInput.value.trim();
+            const provider = providerSelect.value;
+            const groq_model = groqModelInput.value.trim();
+            
+            // Build payload
+            const payload = {
+                provider,
+                groq_model
+            };
+            
+            // Gemini API key payload binding
+            if (api_key !== "") {
+                payload.api_key = api_key;
+            } else if (apiKeyInput.placeholder === 'Enter Gemini API Key') {
+                payload.api_key = ""; // explicit empty
+            }
+            
+            // Groq API key payload binding
+            if (groq_api_key !== "") {
+                payload.groq_api_key = groq_api_key;
+            } else if (groqApiKeyInput.placeholder === 'Enter Groq API Key') {
+                payload.groq_api_key = ""; // explicit empty
+            }
+
+            try {
+                const res = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                if (data.status === 'success') {
+                    showToast("Configuration saved successfully!", "success");
+                    loadSettings();
+                    closeDrawer();
+                } else {
+                    showToast("Failed to save configuration.", "error");
+                }
+            } catch (err) {
+                showToast(`Error saving settings: ${err}`, "error");
+            }
+        });
+
+        // Run search query end-to-end
+        const triggerSearch = async () => {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+
+            // Select pipeline elements
+            const tracker = document.getElementById('pipelineTracker');
+            const resultsPanel = document.getElementById('resultsPanel');
+            const steps = {
+                reformulate: document.getElementById('step-reformulate'),
+                fetch: document.getElementById('step-fetch'),
+                download: document.getElementById('step-download'),
+                ocr: document.getElementById('step-ocr'),
+                embed: document.getElementById('step-embed'),
+                answer: document.getElementById('step-answer')
+            };
+
+            // Set UI to loading state
+            tracker.style.display = 'flex';
+            resultsPanel.style.display = 'none';
+            
+            // Reset all step items status
+            Object.values(steps).forEach(step => {
+                step.className = 'step-item';
+                step.querySelector('.step-status').textContent = 'Waiting to execute...';
+            });
+
+            const updateStep = (key, status, label) => {
+                Object.keys(steps).forEach(k => {
+                    if (k === key) {
+                        steps[k].className = 'step-item active';
+                        steps[k].querySelector('.step-status').textContent = label;
+                    } else if (Object.keys(steps).indexOf(k) < Object.keys(steps).indexOf(key)) {
+                        steps[k].className = 'step-item completed';
+                        steps[k].querySelector('.step-status').textContent = 'Completed successfully.';
+                    }
+                });
+            };
+
+            // Setup parameters
+            const num_files = parseInt(numFilesInput.value);
+            const chunk_size = parseInt(chunkSizeInput.value);
+            const overlap = parseInt(overlapInput.value);
+            const doc_chunks = parseInt(docChunksInput.value);
+            const web_chunks = parseInt(webChunksInput.value);
+
+            // Determine dynamic LLM name label
+            const currentProv = providerSelect.value;
+            let llmName = 'Ollama';
+            if (currentProv === 'gemini') llmName = 'Gemini';
+            else if (currentProv === 'groq') llmName = 'Groq';
+
+            // Execute the pipeline steps manually via polling / API
+            try {
+                // Step 1: Reformulating
+                updateStep('reformulate', 'active', `Optimizing search query with ${llmName} LLM...`);
+                
+                // Real backend unified call (FastAPI is fast, but we simulate pipeline tracking dynamically 
+                // based on expected execution stages while waiting for the unified POST endpoint to finish)
+                
+                // Let's launch the query request
+                const queryPromise = fetch('/api/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query, num_files, chunk_size, overlap, doc_chunks, web_chunks })
+                });
+
+                // Dynamically update steps visually so the user has an animated dashboard experience
+                const stepsTimeline = [
+                    { key: 'fetch', time: 1500, label: 'Connecting to justice.gov multimedia portals...' },
+                    { key: 'download', time: 3500, label: 'Downloading PDFs and saving local copies...' },
+                    { key: 'ocr', time: 6500, label: 'Extracting digital text layers and running PyTesseract...' },
+                    { key: 'embed', time: 10000, label: 'Creating dense vector chunks and query alignments...' },
+                    { key: 'answer', time: 13000, label: `Generating synthesis response via ${llmName} models...` }
+                ];
+
+                stepsTimeline.forEach(s => {
+                    setTimeout(() => {
+                        // Check if the request is already resolved
+                        if (resultsPanel.style.display !== 'grid') {
+                            updateStep(s.key, 'active', s.label);
+                        }
+                    }, s.time);
+                });
+
+                const response = await queryPromise;
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || "Unified RAG execution failed.");
+                }
+                
+                const data = await response.json();
+
+                // Finish visual pipeline tracking
+                Object.keys(steps).forEach(k => {
+                    steps[k].className = 'step-item completed';
+                    steps[k].querySelector('.step-status').textContent = 'Completed successfully.';
+                });
+
+                // Render Results
+                document.getElementById('reformulatedSearch').textContent = data.reformulated.search || 'None';
+                document.getElementById('reformulatedSemantic').textContent = data.reformulated.semantic || 'None';
+                
+                // Render Answer Content
+                const answerText = document.getElementById('answerText');
+                let answerHtml = '';
+                
+                const formatCitations = (txt) => {
+                    let formatted = txt;
+                    formatted = formatted.replace(/\[((?:EFTA\d+|WEB_\d+)\.(?:pdf|url))\]/g, `<span style="background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); color: #818cf8; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.8rem; margin: 0 2px; cursor: pointer;"><i class="fa-solid fa-file-contract" style="margin-right: 4px;"></i>$1</span>`);
+                    formatted = formatted.replace(/((?:EFTA\d+|WEB_\d+)\.(?:pdf|url))/g, `<span style="background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); color: #818cf8; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.8rem; margin: 0 2px; cursor: pointer;"><i class="fa-solid fa-file-contract" style="margin-right: 4px;"></i>$1</span>`);
+                    return formatted;
+                };
+
+                try {
+                    let cleaned = data.answer.trim();
+                    const jsonBlockMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+                    if (jsonBlockMatch) {
+                        cleaned = jsonBlockMatch[1];
+                    } else {
+                        const bracketMatch = cleaned.match(/\{[\s\S]*\}/);
+                        if (bracketMatch) {
+                            cleaned = bracketMatch[0];
+                        }
+                    }
+                    
+                    const parsed = JSON.parse(cleaned);
+                    const asArray = (v) => Array.isArray(v) ? v : (v ? [v] : []);
+
+                    if (parsed && (parsed.points || parsed.source_analysis || parsed.conclusion)) {
+                        const points = asArray(parsed.points);
+                        const sourceAnalysis = asArray(parsed.source_analysis);
+                        const conclusions = asArray(parsed.conclusion);
+
+                        let html = '';
+
+                        // Header bar
+                        html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.07);">
+                            <i class="fa-solid fa-scale-balanced" style="color:var(--accent-primary);font-size:1rem;"></i>
+                            <span style="font-weight:700;font-size:0.95rem;color:#e2e8f0;">Evidence Report</span>
+                            <span style="margin-left:auto;font-size:0.72rem;color:var(--text-dim);">${points.length} findings &bull; ${sourceAnalysis.length} sources &bull; ${conclusions.length} conclusions</span>
+                        </div>`;
+
+                        // Points / Findings
+                        if (points.length > 0) {
+                            html += `<div style="margin-bottom:18px;">
+                                <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--accent-secondary);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+                                    <i class="fa-solid fa-list-check"></i> Findings
+                                </div>
+                                <div style="display:flex;flex-direction:column;gap:10px;">`;
+                            points.forEach((pt, idx) => {
+                                const text = escapeHtml(String(pt.text || ''));
+                                let sourcesSpan = '';
+                                asArray(pt.sources).forEach(src => {
+                                    const srcStr = String(src);
+                                    const isWeb = srcStr.startsWith('http');
+                                    const icon = isWeb ? 'fa-globe' : 'fa-file-pdf';
+                                    const label = isWeb ? (() => { try { const u = new URL(srcStr); return u.hostname; } catch(e) { return srcStr.slice(0, 30); } })() : srcStr;
+                                    sourcesSpan += `<a ${isWeb ? `href="${srcStr}" target="_blank"` : ''} style="display:inline-flex;align-items:center;gap:3px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25);color:${isWeb ? '#38bdf8' : 'var(--accent-secondary)'};padding:1px 7px;border-radius:4px;font-size:0.72rem;font-weight:700;margin-left:4px;cursor:pointer;text-decoration:none;">
+                                        <i class="fa-solid ${icon}" style="font-size:0.65rem;"></i>${escapeHtml(label)}
+                                    </a>`;
+                                });
+                                html += `<div style="display:flex;gap:10px;align-items:flex-start;">
+                                    <span style="font-weight:800;color:var(--accent-primary);min-width:22px;font-size:1rem;">${idx + 1}.</span>
+                                    <span style="flex:1;line-height:1.55;color:#cbd5e1;font-size:0.88rem;">${formatCitations(text)} ${sourcesSpan}</span>
+                                </div>`;
+                            });
+                            html += `</div></div>`;
+                        }
+
+                        // Source Analysis
+                        if (sourceAnalysis.length > 0) {
+                            html += `<div style="margin-bottom:18px;">
+                                <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--accent-secondary);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+                                    <i class="fa-solid fa-magnifying-glass-chart"></i> Source Analysis
+                                </div>
+                                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px;">`;
+                            sourceAnalysis.forEach((item) => {
+                                const src = String(item.source || '');
+                                const isWeb = src.startsWith('http');
+                                const icon = isWeb ? 'fa-globe' : 'fa-file-pdf';
+                                const label = isWeb ? (() => { try { const u = new URL(src); return `${u.hostname}${u.pathname === '/' ? '' : u.pathname.slice(0,30)}`; } catch(e) { return src.slice(0,40); }})() : src;
+                                const accentColor = isWeb ? '#38bdf8' : 'var(--accent-secondary)';
+                                const bgColor = isWeb ? 'rgba(56,189,248,0.06)' : 'rgba(99,102,241,0.06)';
+                                const borderColor = isWeb ? 'rgba(56,189,248,0.18)' : 'rgba(99,102,241,0.18)';
+                                const findings = asArray(item.key_findings);
+                                html += `<div style="background:${bgColor};border:1px solid ${borderColor};border-radius:8px;padding:12px;font-size:0.82rem;">
+                                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                                        <i class="fa-solid ${icon}" style="color:${accentColor};font-size:0.8rem;"></i>
+                                        <a ${isWeb ? `href="${escapeHtml(src)}" target="_blank"` : ''} style="font-weight:700;color:${accentColor};text-decoration:none;word-break:break-all;flex:1;line-height:1.3;font-size:0.78rem;" title="${escapeHtml(src)}">${escapeHtml(label)}</a>
+                                        <span style="font-size:0.65rem;padding:1px 6px;border-radius:3px;background:rgba(255,255,255,0.05);color:var(--text-dim);">${isWeb ? 'Internet' : 'Document'}</span>
+                                    </div>
+                                    ${item.relevance ? `<p style="color:#94a3b8;margin:0 0 6px;font-size:0.78rem;line-height:1.45;">${escapeHtml(String(item.relevance))}</p>` : ''}
+                                    ${findings.length > 0 ? `<ul style="margin:0;padding-left:16px;display:flex;flex-direction:column;gap:3px;color:#cbd5e1;">
+                                        ${findings.map(f => `<li style="line-height:1.45;">${formatCitations(escapeHtml(String(f)))}</li>`).join('')}
+                                    </ul>` : ''}
+                                </div>`;
+                            });
+                            html += `</div></div>`;
+                        }
+
+                        // Conclusion
+                        if (conclusions.length > 0) {
+                            html += `<div style="padding:14px 18px;border-left:4px solid var(--accent-primary);background:rgba(99,102,241,0.07);border-radius:6px;">
+                                <div style="font-weight:800;color:var(--accent-secondary);display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.82rem;text-transform:uppercase;letter-spacing:0.5px;">
+                                    <i class="fa-solid fa-circle-check"></i> Conclusion
+                                </div>
+                                <ul style="padding-left:18px;margin:0;display:flex;flex-direction:column;gap:6px;font-size:0.87rem;color:#cbd5e1;line-height:1.55;">`;
+                            conclusions.forEach(c => { html += `<li>${formatCitations(escapeHtml(String(c)))}</li>`; });
+                            html += `</ul></div>`;
+                        }
+
+                        answerHtml = html;
+                    } else {
+                        throw new Error("Not a structured model answer JSON");
+                    }
+                } catch (e) {
+                    answerHtml = formatCitations(data.answer);
+                }
+                
+                answerText.innerHTML = answerHtml;
+
+                // Render Cited Chunks / Sources
+                document.getElementById('sourcesCount').textContent = `${data.sources.length} Chunks`;
+                const sourcesList = document.getElementById('sourcesList');
+                sourcesList.innerHTML = '';
+
+                if (data.sources.length === 0) {
+                    sourcesList.innerHTML = `
+                        <div class="glass-card" style="padding: 24px; text-align: center; color: var(--text-dim);">
+                            No sources cited for this output.
+                        </div>
+                    `;
+                } else {
+                    data.sources.forEach(src => {
+                        const card = document.createElement('div');
+                        card.className = 'glass-panel glass-card source-card';
+                        card.innerHTML = `
+                            <div class="source-meta">
+                                <span class="source-name">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                    <span>${src.source}</span>
+                                </span>
+                                <span class="source-score">${src.score}% MATCH</span>
+                            </div>
+                            <div class="source-text">${escapeHtml(src.chunk)}</div>
+                        `;
+                        sourcesList.appendChild(card);
+                    });
+                }
+
+                // Show Results Workspace and hide tracker
+                setTimeout(() => {
+                    tracker.style.display = 'none';
+                    resultsPanel.style.display = 'grid';
+                    showToast("Answer generated successfully!", "success");
+                }, 500);
+
+            } catch (err) {
+                tracker.style.display = 'none';
+                showToast(err.message || err, "error");
+                console.error(err);
+            }
+        };
+
+        const escapeHtml = (text) => {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        };
+
+        // Initialize Settings on startup
+        window.addEventListener('load', loadSettings);
+    </script>
+</body>
+</html>
