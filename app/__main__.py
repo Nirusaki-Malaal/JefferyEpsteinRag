@@ -117,7 +117,6 @@ async def update_settings(req: SettingsRequest):
 
     env_path = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
     try:
-        # Always read current .env from disk — NEVER from os.environ to avoid stale values
         env_dict = {}
         if os.path.exists(env_path):
             with open(env_path, "r") as f:
@@ -126,7 +125,6 @@ async def update_settings(req: SettingsRequest):
                         k, _, v = line.partition("=")
                         env_dict[k.strip()] = v.strip().strip('"').strip("'")
 
-        # Only overwrite keys that were explicitly provided in the request
         if req.api_key is not None and req.api_key.strip() != "":
             env_dict["API_KEY"] = req.api_key.strip()
             CURRENT_API_KEY = req.api_key.strip()
@@ -140,12 +138,10 @@ async def update_settings(req: SettingsRequest):
         if req.groq_model is not None and req.groq_model.strip() != "":
             env_dict["GROQ_MODEL"] = req.groq_model.strip()
 
-        # Write back to .env
         with open(env_path, "w") as f:
             for k, v in env_dict.items():
                 f.write(f'{k}="{v}"\n')
 
-        # Sync os.environ with ONLY what's now on disk
         os.environ["API_KEY"] = env_dict.get("API_KEY", "")
         os.environ["GROQ_API_KEY"] = env_dict.get("GROQ_API_KEY", "")
         os.environ["MODEL_PROVIDER"] = env_dict.get("MODEL_PROVIDER", "gemini")
